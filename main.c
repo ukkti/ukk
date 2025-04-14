@@ -11,7 +11,7 @@ typedef struct {
     float diskon;
 } Produk;
 
-void buat_nama_file(char *filename) {
+void generate_nama_file(char *filename) {
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);
     strftime(filename, 100, "struk_%Y%m%d_%H%M%S.txt", tm);
@@ -23,7 +23,7 @@ float kalkulasi_diskon(int jumlah) {
     return 0.0;
 }
 
-int bandingkan_produk(const void *a, const void *b) {
+int banding_jumlah(const void *a, const void *b) {
     Produk *produkA = (Produk *)a;
     Produk *produkB = (Produk *)b;
     return produkB->jumlah - produkA->jumlah;
@@ -51,7 +51,7 @@ void reset(Produk *produk, int jumlah_produk) {
     printf("Pesanan telah direset!\n");
 }
 
-void tampilkan_menu() {
+void tampil_menu() {
     printf("========================================\n");
     printf("      Selamat datang di Toko SKENSA     \n");
     printf("Silakan pilih barang yang Anda inginkan:\n");
@@ -70,12 +70,12 @@ void tampilkan_menu() {
     printf("========================================\n");
 }
 
-void tampilkan_rekap(Produk *produk, int jumlah_produk, int total_bayar, int total_diskon) {
+void tampil_rekapan(Produk *produk, int jumlah_produk, int total_bayar, int total_diskon) {
     int tagihan = total_bayar - total_diskon;
     int nomor = 1;
     Produk produk_urut[jumlah_produk];
     memcpy(produk_urut, produk, sizeof(Produk) * jumlah_produk);
-    qsort(produk_urut, jumlah_produk, sizeof(Produk), bandingkan_produk);
+    qsort(produk_urut, jumlah_produk, sizeof(Produk), banding_jumlah);
 
     printf("=========================================================================\n");
     printf("                           Rekap Pesanan Barang                          \n");
@@ -104,7 +104,7 @@ void tampilkan_rekap(Produk *produk, int jumlah_produk, int total_bayar, int tot
 
 void simpan_struk(Produk *produk, int jumlah_produk, int total_bayar, int total_diskon, int pembayaran) {
     char filename[100];
-    buat_nama_file(filename);
+    generate_nama_file(filename);
     FILE *file = fopen(filename, "w");
     time_t now = time(NULL);
     char waktu[100];
@@ -120,7 +120,7 @@ void simpan_struk(Produk *produk, int jumlah_produk, int total_bayar, int total_
     int kembalian = pembayaran - tagihan;
     Produk produk_urut[jumlah_produk];
     memcpy(produk_urut, produk, sizeof(Produk) * jumlah_produk);
-    qsort(produk_urut, jumlah_produk, sizeof(Produk), bandingkan_produk);
+    qsort(produk_urut, jumlah_produk, sizeof(Produk), banding_jumlah);
 
     fprintf(file, "==============================================================\n");
     fprintf(file, "|                         Toko SKENSA                        |\n");
@@ -179,7 +179,7 @@ int main() {
 
     do {
         system("cls");
-        tampilkan_menu();
+        tampil_menu();
 
         printf("\nMasukkan pilihan: ");
         scanf("%d", &pilihan);
@@ -194,7 +194,7 @@ int main() {
             system("cls");
             hitung_total(daftar_produk, jumlah_produk, &total_bayar, &total_diskon);
             int tagihan = total_bayar - total_diskon;
-            tampilkan_rekap(daftar_produk, jumlah_produk, total_bayar, total_diskon);
+            tampil_rekapan(daftar_produk, jumlah_produk, total_bayar, total_diskon);
 
             printf("\nTotal tagihan Anda: Rp.%d\n", tagihan);
             do {
