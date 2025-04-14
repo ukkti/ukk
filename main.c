@@ -17,10 +17,38 @@ void buat_nama_file(char *filename) {
     strftime(filename, 100, "struk_%Y%m%d_%H%M%S.txt", tm);
 }
 
-float hitung_diskon(int jumlah) {
+float kalkulasi_diskon(int jumlah) {
     if (jumlah > 5) return 0.15;
     if (jumlah > 3) return 0.10;
     return 0.0;
+}
+
+int bandingkan_produk(const void *a, const void *b) {
+    Produk *produkA = (Produk *)a;
+    Produk *produkB = (Produk *)b;
+    return produkB->jumlah - produkA->jumlah;
+}
+
+void hitung_total(Produk *produk, int jumlah_produk, int *total_bayar, int *total_diskon) {
+    *total_bayar = 0;
+    *total_diskon = 0;
+	int i;
+    for (i = 0; i < jumlah_produk; i++) {
+        if (produk[i].jumlah > 0) {
+            *total_bayar += produk[i].total_harga;
+            *total_diskon += (int)(produk[i].diskon * produk[i].total_harga);
+        }
+    }
+}
+
+void reset(Produk *produk, int jumlah_produk) {
+	int i;
+    for (i = 0; i < jumlah_produk; i++) {
+        produk[i].jumlah = 0;
+        produk[i].total_harga = 0;
+        produk[i].diskon = 0;
+    }
+    printf("Pesanan telah direset!\n");
 }
 
 void tampilkan_menu() {
@@ -40,12 +68,6 @@ void tampilkan_menu() {
     printf("55. Reset pilihan\n");
     printf("00. Keluar\n");
     printf("========================================\n");
-}
-
-int bandingkan_produk(const void *a, const void *b) {
-    Produk *produkA = (Produk *)a;
-    Produk *produkB = (Produk *)b;
-    return produkB->jumlah - produkA->jumlah;
 }
 
 void tampilkan_rekap(Produk *produk, int jumlah_produk, int total_bayar, int total_diskon) {
@@ -139,28 +161,6 @@ void simpan_struk(Produk *produk, int jumlah_produk, int total_bayar, int total_
     printf("\nStruk telah disimpan dalam file: %s\n", filename);
 }
 
-void hitung_total(Produk *produk, int jumlah_produk, int *total_bayar, int *total_diskon) {
-    *total_bayar = 0;
-    *total_diskon = 0;
-	int i;
-    for (i = 0; i < jumlah_produk; i++) {
-        if (produk[i].jumlah > 0) {
-            *total_bayar += produk[i].total_harga;
-            *total_diskon += (int)(produk[i].diskon * produk[i].total_harga);
-        }
-    }
-}
-
-void reset_pesanan(Produk *produk, int jumlah_produk) {
-	int i;
-    for (i = 0; i < jumlah_produk; i++) {
-        produk[i].jumlah = 0;
-        produk[i].total_harga = 0;
-        produk[i].diskon = 0;
-    }
-    printf("Pesanan telah direset!\n");
-}
-
 int main() {
     Produk daftar_produk[5] = {
         {"Buku Tulis", 5000, 0, 0, 0},
@@ -174,7 +174,7 @@ int main() {
     int total_bayar = 0, total_diskon = 0;
     int pembayaran = 0;
     int kembalian = 0;
-    const int JUMLAH_PRODUK = 5;
+    const int jumlah_produk = 5;
     int i, j;
 
     do {
@@ -188,13 +188,13 @@ int main() {
             int index = pilihan - 1;
             printf("Masukkan jumlah %s: ", daftar_produk[index].nama);
             scanf("%d", &daftar_produk[index].jumlah);
-            daftar_produk[index].diskon = hitung_diskon(daftar_produk[index].jumlah);
+            daftar_produk[index].diskon = kalkulasi_diskon(daftar_produk[index].jumlah);
             daftar_produk[index].total_harga = daftar_produk[index].harga * daftar_produk[index].jumlah;
         } else if (pilihan == 99) {
             system("cls");
-            hitung_total(daftar_produk, JUMLAH_PRODUK, &total_bayar, &total_diskon);
+            hitung_total(daftar_produk, jumlah_produk, &total_bayar, &total_diskon);
             int tagihan = total_bayar - total_diskon;
-            tampilkan_rekap(daftar_produk, JUMLAH_PRODUK, total_bayar, total_diskon);
+            tampilkan_rekap(daftar_produk, jumlah_produk, total_bayar, total_diskon);
 
             printf("\nTotal tagihan Anda: Rp.%d\n", tagihan);
             do {
@@ -207,12 +207,12 @@ int main() {
 
             kembalian = pembayaran - tagihan;
             printf("Kembalian : Rp.%d", kembalian);
-            simpan_struk(daftar_produk, JUMLAH_PRODUK, total_bayar, total_diskon, pembayaran);
+            simpan_struk(daftar_produk, jumlah_produk, total_bayar, total_diskon, pembayaran);
 
             printf("\nTekan Enter untuk kembali ke menu...");
             getchar(); getchar();
         } else if (pilihan == 55) {
-            reset_pesanan(daftar_produk, JUMLAH_PRODUK);
+            reset(daftar_produk, jumlah_produk);
             printf("Tekan Enter untuk melanjutkan...");
             getchar(); getchar();
         } else if (pilihan == 00) {
